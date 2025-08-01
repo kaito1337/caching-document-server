@@ -1,0 +1,27 @@
+{
+    "server": {
+        "address": ":8080"
+    },
+    "database": {
+        "host": "localhost",
+        "port": "5432",
+        "user": "postgres",
+        "password": "secret",
+        "name": "docs_db",
+        "sslmode": "disable",
+        "maxOpenConns": 25,
+        "maxIdleConns": 10,
+        "connMaxLifetime": 600
+    },
+    "adminToken": "super-secret-token",
+    "log": {
+        "level": "info"
+    },
+    "cache": {
+        "ttl": 5,
+        "max_entries": 1000
+    },
+    "fileStorage": {
+        "path": "./uploads"
+    }
+}

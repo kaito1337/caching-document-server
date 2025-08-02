@@ -1,5 +1,5 @@
 version: '3.8'
-
+name: caching_server
 services:
   postgres:
     image: postgres:15

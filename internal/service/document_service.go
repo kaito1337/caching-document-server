@@ -22,7 +22,7 @@ type DocumentService struct {
 	documentStorage DocumentStorage
 	userStorage     UserStorage
 	tokenStorage    TokenStorage
-	cache           *cache.InMemoryCache
+	cache           Cache
 	storagePath     string
 }
 

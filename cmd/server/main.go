@@ -4,7 +4,6 @@ import (
 	"context"
 	"document-server/internal/api"
 	"document-server/internal/api/controller"
-	"document-server/internal/api/middleware"
 	"document-server/internal/cache"
 	"document-server/internal/config"
 	"document-server/internal/infrastructure/database/postgres"
@@ -55,7 +54,6 @@ func main() {
 
 	docService := service.NewDocumentService(userStorage, docStorage, tokenStorage, cfg.FileStorage.Path, inMemoryCache)
 	authService := service.NewUserService(userStorage, tokenStorage, cfg.AdminToken)
-
 
 	router, err := api.NewRouter()
 

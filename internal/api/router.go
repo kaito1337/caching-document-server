@@ -12,14 +12,11 @@ type Router struct {
 	userAuthMiddleware mux.MiddlewareFunc
 }
 
-func NewRouter(
-	userAuthMiddleware mux.MiddlewareFunc,
-) (*Router, error) {
+func NewRouter() (*Router, error) {
 	r := mux.NewRouter()
 
 	return &Router{
-		Router:             r,
-		userAuthMiddleware: userAuthMiddleware,
+		Router: r,
 	}, nil
 }
 

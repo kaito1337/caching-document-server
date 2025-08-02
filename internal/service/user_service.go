@@ -46,6 +46,11 @@ func (s *UserService) RegisterUser(ctx context.Context, login, password, token s
 		return errors.New("invalid admin token")
 	}
 
+	_, err := s.userStorage.GetUserByLogin(ctx, login)
+	if err == nil {
+		return errors.New("user with this login already exists")
+	}
+
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err

@@ -56,9 +56,8 @@ func main() {
 	docService := service.NewDocumentService(userStorage, docStorage, tokenStorage, cfg.FileStorage.Path, inMemoryCache)
 	authService := service.NewUserService(userStorage, tokenStorage, cfg.AdminToken)
 
-	userAuthMiddleware := middleware.NewUserAuthMiddleware(authService)
 
-	router, err := api.NewRouter(userAuthMiddleware)
+	router, err := api.NewRouter()
 
 	userController := controller.NewUserController(authService)
 	docsController := controller.NewDocumentController(docService)

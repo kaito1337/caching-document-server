@@ -13,7 +13,8 @@
 1. Start the PostgreSQL database in Docker:
 
    ```bash
-   make db-up```
+   make db-up
+   ```
 2. Apply database migrations:
    ```bash
    make migrate-up

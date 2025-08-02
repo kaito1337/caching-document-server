@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type Document struct {
@@ -16,5 +17,5 @@ type Document struct {
 	FilePath  sql.NullString `db:"content_path"`
 	JSONData  sql.NullString `db:"json_content"`
 	CreatedAt time.Time      `db:"created_at"`
-	GrantedTo []string       `db:"granted_to"`
+	GrantedTo pq.StringArray `db:"granted_to"`
 }

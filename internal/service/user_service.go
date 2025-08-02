@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"crypto/rand"
-	"database/sql"
+	"document-server/internal/storage"
 	tokenStorage "document-server/internal/storage/token"
 	userStorage "document-server/internal/storage/user"
 	"encoding/hex"
@@ -62,7 +62,7 @@ func (s *UserService) RegisterUser(ctx context.Context, login, password, token s
 		return semerr.NewBadRequestError(errors.New("user with this login already exists"))
 	}
 
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+	if err != nil && !errors.Is(err, storage.ErrUserNotFound) {
 		s.logger.Error("failed to query user", slog.String("error", err.Error()))
 		return semerr.NewInternalServerError(err)
 	}

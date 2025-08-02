@@ -5,7 +5,8 @@ import (
 	"database/sql"
 	"document-server/internal/api/models"
 	"document-server/internal/cache"
-	storage "document-server/internal/storage/document"
+	"document-server/internal/storage"
+	documentStorage "document-server/internal/storage/document"
 	"log/slog"
 	"slices"
 
@@ -62,7 +63,7 @@ func (s *DocumentService) UploadDocument(ctx context.Context, meta models.Docume
 		meta.Grant = append(meta.Grant, user.Login)
 	}
 
-	doc := storage.Document{
+	doc := documentStorage.Document{
 		ID:        uuid.New(),
 		Name:      meta.Name,
 		MimeType:  meta.Mime,
@@ -185,7 +186,7 @@ func (s *DocumentService) ListDocuments(ctx context.Context, token, login, key, 
 	return result, nil
 }
 
-func (s *DocumentService) GetDocument(ctx context.Context, id string) (*storage.Document, []byte, string, error) {
+func (s *DocumentService) GetDocument(ctx context.Context, id string) (*documentStorage.Document, []byte, string, error) {
 	cacheKey := "document:" + id
 
 	if docCached, ok := s.cache.Get(cacheKey); ok {
@@ -220,7 +221,7 @@ func (s *DocumentService) GetDocument(ctx context.Context, id string) (*storage.
 		mime = doc.MimeType
 	}
 
-	s.cache.Set(cacheKey, &storage.Document{
+	s.cache.Set(cacheKey, &documentStorage.Document{
 		ID:        doc.ID,
 		Name:      doc.Name,
 		MimeType:  doc.MimeType,
@@ -244,8 +245,11 @@ func (s *DocumentService) DeleteDocument(ctx context.Context, id string) error {
 
 	doc, err := s.documentStorage.GetByID(ctx, docUUID.String())
 	if err != nil {
-		s.logger.Error("document not found", slog.String("id", id))
-		return semerr.NewBadRequestError(errors.New("document not found"))
+		if err == storage.ErrDocumentNotFound {
+			return semerr.NewBadRequestError(errors.New("document not found"))
+		}
+		s.logger.Error("selecting doc from DB failed err:", err, slog.String("id", id))
+		return semerr.NewBadRequestError(err)
 	}
 
 	if doc.IsFile && doc.FilePath.Valid {

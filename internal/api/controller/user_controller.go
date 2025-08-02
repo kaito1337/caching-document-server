@@ -5,10 +5,12 @@ import (
 	"document-server/internal/api/response"
 	"document-server/internal/service"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/hedhyw/semerr/pkg/v1/semerr"
 )
 
 type UserController struct {
@@ -22,13 +24,13 @@ func NewUserController(s *service.UserService) *UserController {
 func (c *UserController) Register(w http.ResponseWriter, r *http.Request) {
 	var req models.RegisterRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.RespondWithError(w, http.StatusBadRequest, "Invalid request body")
+		response.RespondWithError(w, semerr.NewBadRequestError(err))
 		return
 	}
 
 	err := c.userService.RegisterUser(r.Context(), req.Login, req.Password, req.Token)
 	if err != nil {
-		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, err)
 		return
 	}
 
@@ -38,14 +40,14 @@ func (c *UserController) Register(w http.ResponseWriter, r *http.Request) {
 func (c *UserController) Authenticate(w http.ResponseWriter, r *http.Request) {
 	var req models.AuthRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.RespondWithError(w, http.StatusBadRequest, "Invalid request body")
+		response.RespondWithError(w, semerr.NewBadRequestError(err))
 		return
 	}
 
 	token, err := c.userService.Authenticate(r.Context(), req.Login, req.Password)
 	if err != nil {
 		slog.Error(err.Error())
-		response.RespondWithError(w, http.StatusUnauthorized, "Invalid credentials")
+		response.RespondWithError(w, err)
 		return
 	}
 
@@ -56,12 +58,12 @@ func (c *UserController) Logout(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	token := vars["token"]
 	if token == "" {
-		response.RespondWithError(w, http.StatusBadRequest, "Missing token in path")
+		response.RespondWithError(w, semerr.NewBadRequestError(errors.New("missing token")))
 		return
 	}
 
 	if err := c.userService.Logout(r.Context(), token); err != nil {
-		response.RespondWithError(w, http.StatusBadRequest, "Invalid or expired token")
+		response.RespondWithError(w, err)
 		return
 	}
 

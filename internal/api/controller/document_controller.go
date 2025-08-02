@@ -10,6 +10,7 @@ import (
 	"document-server/internal/service"
 
 	"github.com/gorilla/mux"
+	"github.com/hedhyw/semerr/pkg/v1/semerr"
 )
 
 type DocumentController struct {
@@ -23,14 +24,14 @@ func NewDocumentController(documentService *service.DocumentService) *DocumentCo
 func (c *DocumentController) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(32 << 20) // 32MB
 	if err != nil {
-		response.RespondWithError(w, http.StatusBadRequest, "Invalid multipart form")
+		response.RespondWithError(w, semerr.NewBadRequestError(err))
 		return
 	}
 
 	metaStr := r.FormValue("meta")
 	var meta models.DocumentUploadMetaDTO
 	if err := json.Unmarshal([]byte(metaStr), &meta); err != nil {
-		response.RespondWithError(w, http.StatusBadRequest, "Invalid meta JSON")
+		response.RespondWithError(w, semerr.NewBadRequestError(err))
 		return
 	}
 
@@ -41,7 +42,7 @@ func (c *DocumentController) UploadDocument(w http.ResponseWriter, r *http.Reque
 	if meta.File {
 		file, header, err := r.FormFile("file")
 		if err != nil {
-			response.RespondWithError(w, http.StatusBadRequest, "Missing file")
+			response.RespondWithError(w, semerr.NewBadRequestError(err))
 			return
 		}
 		defer file.Close()
@@ -49,7 +50,7 @@ func (c *DocumentController) UploadDocument(w http.ResponseWriter, r *http.Reque
 		filename = header.Filename
 		fileBytes, err = io.ReadAll(file)
 		if err != nil {
-			response.RespondWithError(w, http.StatusInternalServerError, "Error reading file")
+			response.RespondWithError(w, semerr.NewBadRequestError(err))
 			return
 		}
 	} else {
@@ -62,7 +63,7 @@ func (c *DocumentController) UploadDocument(w http.ResponseWriter, r *http.Reque
 
 	doc, err := c.documentService.UploadDocument(r.Context(), meta, fileBytes, filename, jsonData)
 	if err != nil {
-		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, err)
 		return
 	}
 
@@ -80,7 +81,7 @@ func (c *DocumentController) GetDocuments(w http.ResponseWriter, r *http.Request
 
 	docs, err := c.documentService.ListDocuments(r.Context(), token, login, key, value, limitStr)
 	if err != nil {
-		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, err)
 		return
 	}
 
@@ -95,7 +96,7 @@ func (c *DocumentController) GetDocument(w http.ResponseWriter, r *http.Request)
 	id := mux.Vars(r)["id"]
 	doc, content, mimeType, err := c.documentService.GetDocument(r.Context(), id)
 	if err != nil {
-		response.RespondWithError(w, http.StatusNotFound, err.Error())
+		response.RespondWithError(w, err)
 		return
 	}
 
@@ -113,7 +114,7 @@ func (c *DocumentController) DeleteDocument(w http.ResponseWriter, r *http.Reque
 	id := mux.Vars(r)["id"]
 	err := c.documentService.DeleteDocument(r.Context(), id)
 	if err != nil {
-		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, err)
 		return
 	}
 

@@ -52,8 +52,8 @@ func main() {
 
 	inMemoryCache := cache.NewInMemoryCache(cfg.CacheConfig)
 
-	docService := service.NewDocumentService(userStorage, docStorage, tokenStorage, cfg.FileStorage.Path, inMemoryCache)
-	authService := service.NewUserService(userStorage, tokenStorage, cfg.AdminToken)
+	docService := service.NewDocumentService(userStorage, docStorage, tokenStorage, logger, cfg.FileStorage.Path, inMemoryCache)
+	authService := service.NewUserService(userStorage, tokenStorage, logger, cfg.AdminToken)
 
 	router, err := api.NewRouter()
 

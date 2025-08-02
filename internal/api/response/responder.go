@@ -3,7 +3,10 @@ package response
 import (
 	"document-server/internal/api/models"
 	"encoding/json"
+	"errors"
 	"net/http"
+
+	"github.com/hedhyw/semerr/pkg/v1/httperr"
 )
 
 func respondJSON(w http.ResponseWriter, httpStatus int, payload interface{}) {
@@ -12,14 +15,21 @@ func respondJSON(w http.ResponseWriter, httpStatus int, payload interface{}) {
 	json.NewEncoder(w).Encode(payload)
 }
 
-func RespondWithError(w http.ResponseWriter, httpStatus int, message string) {
+func RespondWithError(w http.ResponseWriter, err error) {
+	if err == nil {
+		err = errors.New("unknown error")
+	}
+
+	status := httperr.Code(err)
+
 	response := models.APIResponse{
 		Error: &models.APIError{
-			Code: httpStatus,
-			Text: message,
+			Code: status,
+			Text: err.Error(),
 		},
 	}
-	respondJSON(w, httpStatus, response)
+
+	respondJSON(w, status, response)
 }
 
 func RespondWithData(w http.ResponseWriter, httpStatus int, dataPayload interface{}) {

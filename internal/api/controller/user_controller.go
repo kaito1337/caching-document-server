@@ -6,7 +6,6 @@ import (
 	"document-server/internal/service"
 	"encoding/json"
 	"errors"
-	"log/slog"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -46,7 +45,6 @@ func (c *UserController) Authenticate(w http.ResponseWriter, r *http.Request) {
 
 	token, err := c.userService.Authenticate(r.Context(), req.Login, req.Password)
 	if err != nil {
-		slog.Error(err.Error())
 		response.RespondWithError(w, err)
 		return
 	}

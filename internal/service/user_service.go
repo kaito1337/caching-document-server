@@ -86,12 +86,12 @@ func (s *UserService) RegisterUser(ctx context.Context, login, password, token s
 func (s *UserService) Authenticate(ctx context.Context, login, password string) (string, error) {
 	user, err := s.userStorage.GetUserByLogin(ctx, login)
 	if err != nil {
-		s.logger.Warn("authentication failed: user not found", slog.String("login", login))
+		s.logger.Error("authentication failed: user not found", slog.String("login", login))
 		return "", semerr.NewBadRequestError(errors.New("invalid credentials"))
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		s.logger.Warn("authentication failed: incorrect password", slog.String("login", login))
+		s.logger.Error("authentication failed: incorrect password", slog.String("login", login))
 		return "", semerr.NewBadRequestError(errors.New("invalid credentials"))
 	}
 
@@ -120,12 +120,12 @@ func (s *UserService) Authenticate(ctx context.Context, login, password string) 
 func (s *UserService) Logout(ctx context.Context, token string) error {
 	userToken, err := s.tokenStorage.GetByToken(ctx, token)
 	if err != nil {
-		s.logger.Warn("logout failed: token not found", slog.String("token", token))
+		s.logger.Error("logout failed: token not found", slog.String("token", token))
 		return semerr.NewBadRequestError(errors.New("invalid token"))
 	}
 
 	if userToken.UserID == uuid.Nil {
-		s.logger.Warn("logout failed: invalid token", slog.String("token", token))
+		s.logger.Error("logout failed: invalid token", slog.String("token", token))
 		return semerr.NewBadRequestError(errors.New("invalid token"))
 	}
 

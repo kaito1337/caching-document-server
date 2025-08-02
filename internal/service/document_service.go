@@ -49,12 +49,12 @@ func NewDocumentService(
 func (s *DocumentService) UploadDocument(ctx context.Context, meta models.DocumentUploadMetaDTO, fileBytes []byte, filename string, jsonData []byte) (*models.DocumentResponseDTO, error) {
 	userToken, err := s.tokenStorage.GetByToken(ctx, meta.Token)
 	if err != nil {
-		s.logger.Warn("token not found", slog.String("token", meta.Token))
+		s.logger.Error("token not found", slog.String("token", meta.Token))
 		return nil, semerr.NewBadRequestError(errors.New("token not found"))
 	}
 	user, err := s.userStorage.GetUserByID(ctx, userToken.UserID)
 	if err != nil {
-		s.logger.Warn("user not found", slog.String("user_id", userToken.UserID.String()))
+		s.logger.Error("user not found", slog.String("user_id", userToken.UserID.String()))
 		return nil, semerr.NewBadRequestError(errors.New("user not found"))
 	}
 
@@ -83,7 +83,7 @@ func (s *DocumentService) UploadDocument(ctx context.Context, meta models.Docume
 	} else {
 		if len(jsonData) > 0 {
 			if !json.Valid(jsonData) {
-				s.logger.Warn("invalid JSON data")
+				s.logger.Error("invalid JSON data")
 				return nil, semerr.NewBadRequestError(errors.New("invalid JSON data"))
 			}
 			doc.JSONData = sql.NullString{String: string(jsonData), Valid: true}
@@ -107,13 +107,13 @@ func (s *DocumentService) UploadDocument(ctx context.Context, meta models.Docume
 func (s *DocumentService) ListDocuments(ctx context.Context, token, login, key, value, limitStr string) ([]models.DocumentListItemDTO, error) {
 	userToken, err := s.tokenStorage.GetByToken(ctx, token)
 	if err != nil {
-		s.logger.Warn("token not found", slog.String("token", token))
+		s.logger.Error("token not found", slog.String("token", token))
 		return nil, semerr.NewBadRequestError(errors.New("token not found"))
 	}
 
 	user, err := s.userStorage.GetUserByID(ctx, userToken.UserID)
 	if err != nil {
-		s.logger.Warn("user not found", slog.String("user_id", userToken.UserID.String()))
+		s.logger.Error("user not found", slog.String("user_id", userToken.UserID.String()))
 		return nil, semerr.NewBadRequestError(errors.New("user not found"))
 	}
 
@@ -193,7 +193,7 @@ func (s *DocumentService) GetDocument(ctx context.Context, id string) (*storage.
 			data, err := os.ReadFile(docCached.FilePath.String)
 			if err != nil {
 				s.cache.Delete(cacheKey)
-				s.logger.Warn("cached file not found, removed from cache", slog.String("path", docCached.FilePath.String))
+				s.logger.Error("cached file not found, removed from cache", slog.String("path", docCached.FilePath.String))
 				return nil, nil, "", semerr.NewInternalServerError(err)
 			}
 			return docCached, data, docCached.MimeType, nil
@@ -204,7 +204,7 @@ func (s *DocumentService) GetDocument(ctx context.Context, id string) (*storage.
 
 	doc, err := s.documentStorage.GetByID(ctx, id)
 	if err != nil {
-		s.logger.Warn("document not found", slog.String("id", id))
+		s.logger.Error("document not found", slog.String("id", id))
 		return nil, nil, "", semerr.NewBadRequestError(errors.New("document not found"))
 	}
 
@@ -238,13 +238,13 @@ func (s *DocumentService) GetDocument(ctx context.Context, id string) (*storage.
 func (s *DocumentService) DeleteDocument(ctx context.Context, id string) error {
 	docUUID, err := uuid.Parse(id)
 	if err != nil {
-		s.logger.Warn("invalid document ID", slog.String("id", id))
+		s.logger.Error("invalid document ID", slog.String("id", id))
 		return semerr.NewBadRequestError(errors.New("invalid document ID"))
 	}
 
 	doc, err := s.documentStorage.GetByID(ctx, docUUID.String())
 	if err != nil {
-		s.logger.Warn("document not found", slog.String("id", id))
+		s.logger.Error("document not found", slog.String("id", id))
 		return semerr.NewBadRequestError(errors.New("document not found"))
 	}
 

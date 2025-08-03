@@ -1,5 +1,5 @@
-
-
+PLATFORM := linux
+ARCH := amd64
 
 MIGRATE_TOOL_URL:=https://github.com/golang-migrate/migrate/releases/download/v4.15.1/migrate.${PLATFORM}-${ARCH}.tar.gz
 OUT_PATH?=./bin/server
@@ -16,8 +16,9 @@ build:
 
 bin/migrate:
 	mkdir -p ./bin
-	curl -L ${MIGRATE_TOOL_URL} | tar xvz -C ./bin/migrate
-	chmod +x $@
+	curl -L ${MIGRATE_TOOL_URL} | tar xz -C ./bin
+	chmod +x ./bin/migrate
+
 
 migrate-up:
 	migrate -database="${MIGRATE_DB_URL}" -path ./migrations up

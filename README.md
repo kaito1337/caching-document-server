@@ -1,4 +1,4 @@
-# Документация по запуску приложения / Application Launch Guide
+# Application Launch Guide / Документация по запуску приложения
 
 ---
 ## English
@@ -10,19 +10,17 @@
 
 ### Quick Start
 
-1. Start the PostgreSQL database in Docker:
+1. Start all services (PostgreSQL, Backend):
 
    ```bash
-   make db-up
+   docker compose -f deployments/docker-compose.yml up -d
    ```
 2. Apply database migrations:
    ```bash
    make migrate-up
    ```
-3. Run the application server:
-   ```bash
-   make run
-   ```
+3. Access the application:
+   API: http://localhost:8080
 ## Русский
 
 ### Требования
@@ -32,16 +30,14 @@
 
 ### Быстрый старт
 
-1. Запустить базу данных PostgreSQL в Docker:
+1. Запустите все сервисы (PostgreSQL, Backend):
 
    ```bash
-   make db-up
+   docker compose -f deployments/docker-compose.yml up -d
    ```
 2. Применить миграции к базе данных:
    ```bash
    make migrate-up
    ```
-3. Запустить сервер приложения:
-   ```bash
-   make run
-   ```
+3. Доступ к сервисам:
+   API: http://localhost:8080

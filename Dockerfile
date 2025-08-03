@@ -7,7 +7,7 @@ RUN apk add --no-cache curl make
 COPY . .
 
 RUN make bin/migrate
-RUN make build OUT=/app/bin/udb
+RUN make build OUT=/app/bin/server
 
 FROM alpine:3.19
 
@@ -15,9 +15,10 @@ WORKDIR /app
 
 RUN apk add --no-cache curl make
 
+COPY --from=builder /app/configs /app/configs
 COPY --from=builder /app/migrations /app/migrations
 COPY --from=builder /app/Makefile /app/Makefile
 COPY --from=builder /app/bin/migrate /app/bin/migrate
-COPY --from=builder /app/bin/udb /app/bin/udb
+COPY --from=builder /app/bin/server /app/bin/server
 
-CMD ["/app/bin/udb"]
+CMD ["/app/bin/server"]

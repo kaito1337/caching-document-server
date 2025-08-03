@@ -35,7 +35,7 @@ func main() {
 
 	if _, err := os.Stat(cfg.FileStorage.Path); os.IsNotExist(err) {
 		os.MkdirAll(cfg.FileStorage.Path, 0755)
-		slog.Info("created file storage directory", slog.String("path", cfg.FileStorage.Path))
+		logger.Info("created file storage directory", slog.String("path", cfg.FileStorage.Path))
 	}
 
 	db, err := postgres.Connect(&cfg.Database)
@@ -44,7 +44,7 @@ func main() {
 	}
 	defer db.Close()
 
-	log.Println("Database connected")
+	logger.Info("Database connected")
 
 	docStorage := document.NewDocumentStorage(db)
 	userStorage := user.NewUserStorage(db)
@@ -56,6 +56,9 @@ func main() {
 	authService := service.NewUserService(userStorage, tokenStorage, logger, cfg.AdminToken)
 
 	router, err := api.NewRouter()
+	if err != nil {
+		log.Fatalf("failed to create router: %v", err)
+	}
 
 	userController := controller.NewUserController(authService)
 	docsController := controller.NewDocumentController(docService)
